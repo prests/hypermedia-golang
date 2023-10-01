@@ -1,0 +1,20 @@
+version: "3.8"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: ./dev.Dockerfile
+    image: hypermedia-golang
+    container_name: hypermedia-golang-app
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./:/app
+    environment:
+      PORT: "8080"
+    networks:
+      - hypermedia-golang-networks
+
+networks:
+  hypermedia-golang-networks:
