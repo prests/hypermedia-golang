@@ -1,24 +1,28 @@
 package api
 
 import (
-	"fmt"
 	"net/http"
+
+	"github.com/prests/hypermedia-golang/router"
 )
 
-type Server interface {
-	StartServer(port string) error
+type server struct {
+	http.Handler
 }
 
-type server struct {}
+func NewServer(fs http.Handler, routers ...router.Router) *server {
+	s := new(server)
 
-func NewServer() Server {
-	return &server{}
-}
+	mux := http.NewServeMux()
+	mux.Handle("/assets/", http.StripPrefix("/assets/", fs))
 
-func (s *server) StartServer(port string) error {
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "Hello World!")
-	})
+	for _, apiRouter := range routers {
+		for _, r := range apiRouter.Routes() {
+			mux.HandleFunc(r.Pattern(), r.Handler())
+		}
+	}
 
-	return http.ListenAndServe(fmt.Sprintf(":%s", port), nil)
+	s.Handler = mux
+
+	return s
 }

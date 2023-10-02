@@ -1,12 +1,20 @@
 package main
 
 import (
+	"fmt"
+	"log"
+	"net/http"
 	"os"
 
 	"github.com/prests/hypermedia-golang/api"
+	"github.com/prests/hypermedia-golang/router/routes/navigation"
 )
 
 func main() {
-	server := api.NewServer()
-	server.StartServer(os.Args[1])
+	fs := http.FileServer(http.Dir("web/assets"))
+
+	navigationRouter := navigation.NewRouter()
+
+	server := api.NewServer(fs, navigationRouter)
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", os.Args[1]), server))
 }
